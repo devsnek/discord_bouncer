@@ -1,11 +1,10 @@
 const joi = require('joi');
-const { WSEvents: Events } = require('discord.js/src/util/Constants');
 const APIError = require('./APIError');
-const { APIErrors } = require('../Constants');
+const { APIErrors, APIEvents } = require('../Constants');
 const { transformTextMessage } = require('./APIHelpers');
 
 module.exports = {
-  [Events.MESSAGE_CREATE]: {
+  [APIEvents.MESSAGE_CREATE]: {
     validation: () =>
       joi.object().keys({
         channel_id: joi.string().required(),
@@ -17,7 +16,7 @@ module.exports = {
     },
   },
 
-  [Events.MESSAGE_EDIT]: {
+  [APIEvents.MESSAGE_EDIT]: {
     validation: () =>
       joi.object().keys({
         channel_id: joi.string().required(),

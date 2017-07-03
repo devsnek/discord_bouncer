@@ -1,17 +1,34 @@
 // an attempt to mock the discord rpc api, adding on to support rest things
 
+require('promise_util');
 const joi = require('joi');
 const { APICommands, APIErrors } = require('../Constants');
 const APIError = require('./APIError');
-const { transformUser, transformChannel } = require('./APIHelpers');
+const {
+  transformUser,
+  transformChannel,
+  transformGuild,
+} = require('./APIHelpers');
 const APIDispatcherEvents = require('./APIDispatcherEvents');
 
 module.exports = {
   [APICommands.DISPATCH]: {
     handler({ server, client, evt, args }) {
+      const promise = Promise.create();
       const event = APIDispatcherEvents[evt];
       if (!event) throw new APIError(APIError.INVALID_EVENT, evt);
-      return event.handler({ server, client, evt, args });
+      if (event.validation) {
+        joi.validate(args, event.validation(), {
+          convert: false,
+          allowUnknown: true,
+        }, err => {
+          if (err) throw new APIError(APIErrors.INVALID_PAYLOAD, err.message);
+          promise.resolve(event.handler({ server, client, evt, args }));
+        });
+      } else {
+        promise.resolve(event.handler({ server, client, evt, args }));
+      }
+      return promise;
     },
   },
 
@@ -38,24 +55,9 @@ module.exports = {
         timeout: joi.number().min(0).max(60),
       }),
     handler({ client, args: { guild_id } }) {
-      return new Promise((resolve) => {
-        const guild = client.guilds.get(guild_id);
-        if (!guild) throw new APIError(APIErrors.INVALID_GUILD, guild_id);
-        const onlineMembers = guild.members.filter
-        .filter(({ presence }) => presence.status && presence.status !== 'offline')
-        .map((member) => ({
-          user: transformUser(member.user),
-          nick: member.nick,
-          status: member.presence.status,
-          activity: member.presence.game ? member.presence.game.name : undefined,
-        }));
-        resolve({
-          id: guild.id,
-          name: guild.name,
-          icon_url: guild.iconURL(),
-          members: onlineMembers,
-        });
-      });
+      const guild = client.guilds.get(guild_id);
+      if (!guild) throw new APIError(APIErrors.INVALID_GUILD, guild_id);
+      return transformGuild(guild);
     },
   },
 
@@ -102,9 +104,7 @@ module.exports = {
     handler({ server, evt, args }) {
       return new Promise(resolve => {
         if (!server.events[evt]) throw new APIError(APIErrors.INVALID_EVENT, evt);
-        const event = server.events[evt];
-        const updater = event.handler({ args });
-        setImmediate(() => server.addSubscription(evt, args, updater));
+        setImmediate(() => server.addSubscription(evt, args));
         resolve({ evt });
       });
     },
@@ -113,9 +113,7 @@ module.exports = {
   [APICommands.UNSUBSCRIBE]: {
     handler({ server, evt, args }) {
       if (!server.events[evt]) throw new APIError(APIError.INVALID_EVENT, evt);
-
       server.removeSubscription(evt, args);
-
       return { evt };
     },
   },
