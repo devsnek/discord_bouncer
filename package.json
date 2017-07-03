@@ -1,0 +1,28 @@
+{
+  "name": "discord_bouncer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/discord_bouncer.js",
+  "scripts": {
+    "build": "pkg ./package.json --out-path=./build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devsnek/discord_bouncer.git"
+  },
+  "author": "snek <me@gus.host>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/devsnek/discord_bouncer/issues"
+  },
+  "homepage": "https://github.com/devsnek/discord_bouncer#readme",
+  "dependencies": {
+    "discord.js": "github:hydrabolt/discord.js",
+    "joi": "^10.6.0",
+    "pkg": "^4.1.1"
+  },
+  "bin": "./src/discord_bouncer.js",
+  "pkg": {
+    "scripts": "./src/**/*.js"
+  }
+}
