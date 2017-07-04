@@ -20,19 +20,18 @@ function containsFilteredValues(obj, filter) {
 }
 
 function transformGuild(guild) {
-  const onlineMembers = guild.members
-  .filter(({ presence }) => presence.status && presence.status !== 'offline')
-  .map((member) => ({
-    user: transformUser(member.user),
-    nick: member.nick,
-    status: member.presence.status,
-    activity: member.presence.game ? member.presence.game.name : undefined,
-  }));
   return {
     id: guild.id,
     name: guild.name,
     icon_url: guild.iconURL(),
-    members: onlineMembers,
+    members: guild.members
+    .filter(({ presence }) => presence.status && presence.status !== 'offline')
+    .map((member) => ({
+      user: transformUser(member.user),
+      nick: member.nick,
+      status: member.presence.status,
+      activity: member.presence.game ? member.presence.game.name : undefined,
+    })),
   };
 }
 

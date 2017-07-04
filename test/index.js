@@ -14,9 +14,7 @@ const send = (cmd, evt, args = {}) => {
   const nonce = Date.now().toString();
   const promise = Promise.create();
   expecting.set(nonce, promise);
-  const payload = JSON.stringify({ cmd, evt, args, nonce });
-  bouncer.stdin.write(payload);
-  console.log(payload);
+  bouncer.stdin.write(JSON.stringify({ cmd, evt, args, nonce }));
   return promise;
 };
 
@@ -33,22 +31,20 @@ bouncer.stdout.on('data', (message) => {
     const p = expecting.get(payload.nonce);
     if (payload.evt === 'ERROR') p.reject(new Error(payload.data.message));
     else p.resolve(payload);
+    expecting.delete(payload.nonce);
   }
 
   if (payload.evt === 'READY') {
     send('AUTHENTICATE', {
       token: auth.token,
-    }).then(console.log);
+    });
   } else if (payload.cmd === 'AUTHENTICATE') {
-    // send('GET_CHANNELS', { guild_id: '222078108977594368' });
-    // send('DISPATCH', 'MESSAGE_CREATE', {
-    //   channel_id: '222079895583457280',
-    //   content: 'hi!',
-    // }).then(console.log);
-    send('SUBSCRIBE', 'MESSAGE_CREATE', {
-      channel_id: '222079895583457280',
-    }).then(console.log).catch(console.error);
-  } else {
-    console.log(payload);
+    send('SUBSCRIBE', 'MESSAGE_CREATE');
+  } else if (payload.evt === 'MESSAGE_CREATE') {
+    if (payload.data.content !== '!ping') return;
+    send('DISPATCH', 'MESSAGE_CREATE', {
+      channel_id: payload.data.channel_id,
+      content: 'pong!',
+    });
   }
 });
