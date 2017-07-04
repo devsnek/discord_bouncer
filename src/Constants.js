@@ -70,6 +70,8 @@ exports.APIEvents = keyMirror([
 exports.APIErrors = {
   UNKNOWN_ERROR: 1000,
 
+  CLOSE_ABNORMAL: 1006,
+
   INVALID_PAYLOAD: 4000,
   INVALID_COMMAND: 4002,
   INVALID_GUILD: 4003,
@@ -93,6 +95,9 @@ exports.APIErrorsInternal = {
   4009: (token) => `Invalid token: ${token}`,
   4010: (user_id) => `Invalid user id: ${user_id}`,
 };
+
+exports.RPC_START_PORT = 6463;
+exports.RPC_END_PORT = 6473;
 
 function keyMirror(arr) {
   return arr.reduce((o, i) => {

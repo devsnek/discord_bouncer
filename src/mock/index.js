@@ -81,14 +81,14 @@ class MockAPI {
   }
 
   start() {
-    this.dispatch(null, APICommands.DISPATCH, APIEvents.READY, {
-      v: 1,
-      config: {
-        cdn_host: this.client.options.http.cdn.replace('https://', ''),
-        api_endpoint: this.client.options.http.host,
-        environment: process.env.NODE_ENV,
-      },
-    });
+    // this.dispatch(null, APICommands.DISPATCH, APIEvents.READY, {
+    //   v: 1,
+    //   config: {
+    //     cdn_host: this.client.options.http.cdn.replace('https://', ''),
+    //     api_endpoint: this.client.options.http.host,
+    //     environment: process.env.NODE_ENV,
+    //   },
+    // });
   }
 
   handleGlobalRejection(_, err) {
