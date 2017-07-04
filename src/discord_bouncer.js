@@ -21,7 +21,9 @@ const api = new MockAPI({ client });
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', (chunk) => api.handle(chunk));
 
-process.on('unhandledRejection', api.handleGlobalRejection.bind(api));
-process.on('uncaughtException', api.handleGlobalException.bind(api));
+if (process.env.NODE_ENV === 'production') {
+  process.on('unhandledRejection', api.handleGlobalRejection.bind(api));
+  process.on('uncaughtException', api.handleGlobalException.bind(api));
+}
 
 api.start();

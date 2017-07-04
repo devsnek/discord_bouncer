@@ -91,6 +91,7 @@ exports.APIErrorsInternal = {
   4004: (evt) => `Invalid event: ${evt}`,
   4005: (channel_id) => `Invalid channel id: ${channel_id}`,
   4009: (token) => `Invalid token: ${token}`,
+  4010: (user_id) => `Invalid user id: ${user_id}`,
 };
 
 function keyMirror(arr) {

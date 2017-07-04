@@ -3,7 +3,9 @@ const auth = require('./auth');
 const child_process = require('child_process');
 const Snowflake = require('discord.js').Snowflake;
 
-const bouncer = child_process.spawn('./src/discord_bouncer.js');
+const bouncer = child_process.spawn('./src/discord_bouncer.js', {
+  env: Object.assign({ NODE_ENV: 'development' }, process.env),
+});
 
 const expecting = new Map();
 
@@ -49,7 +51,7 @@ bouncer.stdout.on('data', (data) => {
   } else if (payload.evt === 'MESSAGE_CREATE') {
     const message = payload.data;
     const content = message.content;
-    if (!content.startsWith('```json') && content.endsWith('```')) return;
+    if (!content.startsWith('```json') || !content.endsWith('```')) return;
     let body;
     try {
       body = JSON.parse(content.replace(/(^```json|```$)/g, '').trim());
