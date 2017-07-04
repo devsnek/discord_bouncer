@@ -9,8 +9,9 @@ const argv = snekparse(process.argv);
 
 const client = new Discord.Client({
   http: {
-    host: argv.host,
-    cdn: argv.cdn,
+    host: argv.api_endpoint,
+    cdn: argv.cdn_host,
+    invite: argv.invite_endpoint,
   },
 });
 const api = new API({ client });
