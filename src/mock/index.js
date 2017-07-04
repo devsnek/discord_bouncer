@@ -11,7 +11,7 @@ const {
   APICommands,
 } = require('../Constants');
 
-class API {
+class MockAPI {
   constructor({ client }) {
     this.client = client;
     this.commands = APICommandHandlers;
@@ -128,4 +128,4 @@ class API {
   }
 }
 
-module.exports = API;
+module.exports = MockAPI;

@@ -2,7 +2,7 @@
 
 const snekparse = require('snekparse');
 const Discord = require('discord.js');
-const API = require('./API');
+const MockAPI = require('./mock');
 const joi = require('joi');
 joi.snowflake = () => joi.string().max(19);
 
@@ -16,7 +16,7 @@ const client = new Discord.Client({
     invite: argv.invite_endpoint,
   },
 });
-const api = new API({ client });
+const api = new MockAPI({ client });
 
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', (chunk) => api.handle(chunk));
