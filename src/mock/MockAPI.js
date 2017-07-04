@@ -1,3 +1,4 @@
+const EventEmitter = require('events');
 const joi = require('joi');
 const APICommandHandlers = require('./APICommands');
 const APIEventHandlers = require('./APIEvents');
@@ -11,8 +12,9 @@ const {
   APICommands,
 } = require('../Constants');
 
-class MockAPI {
+class MockAPI extends EventEmitter {
   constructor({ client }) {
+    super();
     this.client = client;
     this.commands = APICommandHandlers;
     this.events = APIEventHandlers;
@@ -68,7 +70,8 @@ class MockAPI {
     evt = null,
     data = null
   ) {
-    process.stdout.write(`${JSON.stringify({ cmd, data, evt, nonce, interface: 'mock' })}\n`);
+    this.emit('out', { cmd, data, evt, nonce, interface: 'mock' });
+    return this;
   }
 
   error(
@@ -78,10 +81,19 @@ class MockAPI {
     message = 'Unknown Error'
   ) {
     this.dispatch(nonce, cmd, APIEvents.ERROR, { code, message });
+    return this;
   }
 
   start() {
-    return this;
+    this.dispatch(null, APICommands.DISPATCH, APIEvents.READY, {
+      v: 1,
+      config: {
+        cdn_host: this.client.options.http.cdn.replace('https://', ''),
+        api_endpoint: this.client.options.http.host,
+        environment: process.env.NODE_ENV,
+      },
+    });
+    return Promise.resolve(this);
   }
 
   handleGlobalRejection(_, err) {
@@ -96,7 +108,7 @@ class MockAPI {
 
     if (this.getSubscription(evt, args)) return;
 
-    this.subscriptions.add({
+    return this.subscriptions.add({
       dispatch,
       evt,
       args,
@@ -118,6 +130,7 @@ class MockAPI {
       if (s.evt !== evt || !containsFilteredValues(data, s.args)) return;
       s.dispatch(data);
     });
+    return this;
   }
 }
 

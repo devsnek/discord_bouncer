@@ -41,7 +41,9 @@ bouncer.stdout.on('data', (data) => {
     expecting.delete(payload.nonce);
   }
 
-  if (payload.evt === 'READY') {
+  if (payload.cmd === 'SELECT') {
+    send('SELECT', { interface: 'mock' });
+  } else if (payload.evt === 'READY') {
     send('AUTHENTICATE', {
       token: auth.token,
     });
