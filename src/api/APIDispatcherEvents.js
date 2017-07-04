@@ -34,7 +34,7 @@ module.exports = {
   STATUS_UPDATE: {
     validation: () =>
       joi.object().required().keys({
-        idle_since: joi.number().integer().optional(),
+        since: joi.number().integer().optional(),
         afk: joi.boolean().optional(),
         game: joi.object().optional().keys({
           name: joi.string().required(),
@@ -43,11 +43,7 @@ module.exports = {
         }),
       }),
     handler({ client, args }) {
-      return client.user.setPresence({
-        since: args.idle_since,
-        afk: args.afk,
-        game: args.game,
-      }).then(() => client.user.localPresence);
+      return client.user.setPresence(args).then(() => client.user.localPresence);
     },
   },
 };
