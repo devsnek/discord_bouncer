@@ -9,48 +9,9 @@ const {
 } = require('./APIHelpers');
 
 module.exports = {
-  [APIEvents.MESSAGE_CREATE]: {
-    validation: () =>
-      joi.object().required().keys({
-        channel_id: joi.snowflake().required(),
-      }),
-    handler({ client, args }) {
-      const channel = client.channels.get(args.channel_id);
-      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
-      return channel.send(args).then((m) => transformTextMessage(m));
-    },
-  },
-
-  [APIEvents.MESSAGE_UPDATE]: {
-    validation: () =>
-      joi.object().required().keys({
-        channel_id: joi.snowflake().required(),
-        message_id: joi.snowflake().required(),
-      }),
-    handler({ client, args }) {
-      const channel = client.channels.get(args.channel_id);
-      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
-      const content = args.content || null;
-      return channel.fetchMessage(args.message_id)
-        .then((message) => message.edit(content, args))
-        .then((m) => transformTextMessage(m));
-    },
-  },
-
-  [APIEvents.MESSAGE_DELETE]: {
-    validation: () =>
-      joi.object().required().keys({
-        channel_id: joi.snowflake().required(),
-        message_id: joi.snowflake().required(),
-      }),
-    handler({ client, args }) {
-      const channel = client.channels.get(args.channel_id);
-      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
-      return channel.fetchMessage(args.message_id)
-        .then((message) => message.delete())
-        .then((m) => transformTextMessage(m));
-    },
-  },
+  /**
+   * GUILD EVENTS
+   */
 
   [APIEvents.GUILD_UPDATE]: {
     validation: () =>
@@ -63,6 +24,56 @@ module.exports = {
       return guild.edit(args).then((g) => transformGuild(g));
     },
   },
+
+  /**
+   * CHANNEL EVENTS
+   */
+
+  [APIEvents.CHANNEL_CREATE]: {
+    validation: () =>
+      joi.object().required().keys({
+        guild_id: joi.snowflake(),
+        user_id: joi.snowflake(),
+      }),
+    handler({ client, args }) {
+      const guild = client.guilds.get(args.guild_id);
+      if (!guild) throw new APIError(APIErrors.INVALID_GUILD, args.guild_id);
+      return guild.createChannel(args.name, args.type)
+        .then((c) => transformChannel(c));
+    },
+  },
+
+  [APIEvents.CHANNEL_UPDATE]: {
+    validation: () =>
+      joi.object().required().keys({
+        channel_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const channel = client.channels.get(args.channel_id);
+      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
+      return channel.edit(args).then((c) => transformChannel(c));
+    },
+  },
+
+  [APIEvents.CHANNEL_DELETE]: {
+    validation: () =>
+      joi.object().required().keys({
+        channel_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const channel = client.channels.get(args.channel_id);
+      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
+      return channel.delete().then((c) => transformChannel(c));
+    },
+  },
+
+  [APIEvents.CHANNEL_OVERWRITE_CREATE]: {},
+  [APIEvents.CHANNEL_OVERWRITE_UPDATE]: {},
+  [APIEvents.CHANNEL_OVERWRITE_DELETE]: {},
+
+  /**
+   * MEMBER EVENTS
+   */
 
   [APIEvents.MEMBER_BAN_ADD]: {
     validation: () =>
@@ -117,21 +128,43 @@ module.exports = {
     },
   },
 
-  [APIEvents.CHANNEL_CREATE]: {
-    validation: () =>
-      joi.object().required().keys({
-        guild_id: joi.snowflake(),
-        user_id: joi.snowflake(),
-      }),
-    handler({ client, args }) {
-      const guild = client.guilds.get(args.guild_id);
-      if (!guild) throw new APIError(APIErrors.INVALID_GUILD, args.guild_id);
-      return guild.createChannel(args.name, args.type)
-        .then((c) => transformChannel(c));
-    },
-  },
+  /**
+   * ROLE EVENTS
+   */
 
-  [APIEvents.CHANNEL_UPDATE]: {
+  [APIEvents.ROLE_CREATE]: {},
+  [APIEvents.ROLE_UPDATE]: {},
+  [APIEvents.ROLE_DELETE]: {},
+
+  /**
+   * INVITE EVENTS
+   */
+
+  [APIEvents.INVITE_CREATE]: {},
+  [APIEvents.INVITE_UPDATE]: {},
+  [APIEvents.INVITE_DELETE]: {},
+
+  /**
+   * WEBHOOK EVENTS
+   */
+
+  [APIEvents.WEBHOOK_CREATE]: {},
+  [APIEvents.WEBHOOK_UPDATE]: {},
+  [APIEvents.WEBHOOK_DELETE]: {},
+
+  /**
+   * EMOJI EVENTS
+   */
+
+  [APIEvents.EMOJI_CREATE]: {},
+  [APIEvents.EMOJI_UPDATE]: {},
+  [APIEvents.EMOJI_DELETE]: {},
+
+  /**
+   * MESSAGE EVENTS
+   */
+
+  [APIEvents.MESSAGE_CREATE]: {
     validation: () =>
       joi.object().required().keys({
         channel_id: joi.snowflake().required(),
@@ -139,21 +172,53 @@ module.exports = {
     handler({ client, args }) {
       const channel = client.channels.get(args.channel_id);
       if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
-      return channel.edit(args).then((c) => transformChannel(c));
+      return channel.send(args).then((m) => transformTextMessage(m));
     },
   },
 
-  [APIEvents.CHANNEL_DELETE]: {
+  [APIEvents.MESSAGE_UPDATE]: {
     validation: () =>
       joi.object().required().keys({
         channel_id: joi.snowflake().required(),
+        message_id: joi.snowflake().required(),
       }),
     handler({ client, args }) {
       const channel = client.channels.get(args.channel_id);
       if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
-      return channel.delete().then((c) => transformChannel(c));
+      const content = args.content || null;
+      return channel.fetchMessage(args.message_id)
+        .then((message) => message.edit(content, args))
+        .then((m) => transformTextMessage(m));
     },
   },
+
+  [APIEvents.MESSAGE_DELETE]: {
+    validation: () =>
+      joi.object().required().keys({
+        channel_id: joi.snowflake().required(),
+        message_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const channel = client.channels.get(args.channel_id);
+      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
+      return channel.fetchMessage(args.message_id)
+        .then((message) => message.delete())
+        .then((m) => transformTextMessage(m));
+    },
+  },
+
+
+  /**
+   * SPEAKING EVENTS
+   */
+  [APIEvents.SPEAKING_START]: {},
+  [APIEvents.SPEAKING_STOP]: {},
+
+  /**
+   * TYPING EVENTS
+   */
+  [APIEvents.TYPING_START]: {},
+  [APIEvents.TYPING_STOP]: {},
 
   STATUS_UPDATE: {
     validation: () =>
