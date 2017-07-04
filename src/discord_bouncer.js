@@ -3,6 +3,8 @@
 const snekparse = require('snekparse');
 const Discord = require('discord.js');
 const API = require('./API');
+const joi = require('joi');
+joi.snowflake = () => joi.string().max(19);
 
 if (!process.env.NODE_ENV) process.env.NODE_ENV = 'production';
 const argv = snekparse(process.argv);

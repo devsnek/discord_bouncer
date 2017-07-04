@@ -51,7 +51,7 @@ module.exports = {
   [APICommands.GET_GUILD]: {
     validation: () =>
       joi.object().required().keys({
-        guild_id: joi.string(),
+        guild_id: joi.snowflake().required(),
         timeout: joi.number().min(0).max(60),
       }),
     handler({ client, args: { guild_id } }) {
