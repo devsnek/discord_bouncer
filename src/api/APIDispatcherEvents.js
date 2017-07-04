@@ -47,7 +47,7 @@ module.exports = {
         since: args.idle_since,
         afk: args.afk,
         game: args.game,
-      }).then(() => args);
+      }).then(() => client.user.localPresence);
     },
   },
 };

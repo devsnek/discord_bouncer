@@ -1,6 +1,7 @@
 require('promise_util');
 const auth = require('./auth');
 const child_process = require('child_process');
+const Snowflake = require('discord.js').Snowflake;
 
 const bouncer = child_process.spawn('./src/discord_bouncer.js');
 
@@ -11,7 +12,7 @@ const send = (cmd, evt, args = {}) => {
     args = evt;
     evt = undefined;
   }
-  const nonce = Date.now().toString();
+  const nonce = Snowflake.generate();
   const promise = Promise.create();
   expecting.set(nonce, promise);
   bouncer.stdin.write(JSON.stringify({ cmd, evt, args, nonce }));
@@ -42,10 +43,7 @@ bouncer.stdout.on('data', (message) => {
     console.log('READY!');
     send('SUBSCRIBE', 'MESSAGE_CREATE');
     send('DISPATCH', 'STATUS_UPDATE', {
-      afk: false,
-      game: {
-        name: 'memes',
-      },
+      game: { name: 'memes' },
     }).then(console.log);
   } else if (payload.evt === 'MESSAGE_CREATE') {
     if (payload.data.content !== '!ping') return;
