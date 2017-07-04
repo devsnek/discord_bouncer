@@ -68,11 +68,6 @@ module.exports = {
       joi.object().required().keys({
         guild_id: joi.snowflake(),
         user_id: joi.snowflake(),
-        name: joi.string().required(),
-        type: joi.string().required().regex(/text|voice/),
-        bitrate: joi.number().integer(),
-        user_limit: joi.number().integer(),
-        permissions_overwrites: joi.array().items(joi.object()),
       }),
     handler({ client, args }) {
       const guild = client.guilds.get(args.guild_id);
