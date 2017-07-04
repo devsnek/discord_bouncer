@@ -34,10 +34,10 @@ class RPCConnection extends EventEmitter {
         this.emit('error', e);
         this.disconnect();
         return;
-      }      
+      }
     };
 
-    ws.onopen = () => console.log('open');
+    ws.onopen = () => this.emit('connected');
   }
 
   disconnect(e) {
