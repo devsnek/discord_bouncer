@@ -1,17 +1,15 @@
 const joi = require('joi');
+const APICommandHandlers = require('./APICommands');
+const APIEventHandlers = require('./APIEvents');
+const APIError = require('./APIError');
+const deepEqual = require('../utils/deep_equal');
+const { containsFilteredValues } = require('./APIHelpers');
+const djsBind = require('./DJSBind');
 const {
   APIErrors,
   APIEvents,
   APICommands,
 } = require('../Constants');
-const APICommandHandlers = require('./APICommands');
-const APIEventHandlers = require('./APIEvents');
-const APIError = require('./APIError');
-const deepEqual = require('../utils/deep_equal');
-const {
-  deduplicate,
-  containsFilteredValues,
-} = require('./APIHelpers');
 
 class API {
   constructor({ client }) {
@@ -19,7 +17,7 @@ class API {
     this.commands = APICommandHandlers;
     this.events = APIEventHandlers;
     this.subscriptions = new Set();
-    this.mountListeners(client);
+    djsBind({ server: this, client });
   }
 
   handle(message) {
@@ -122,51 +120,10 @@ class API {
       s.evt === evt && deepEqual(s.args, args));
   }
 
-  dispatchToSubscriptions(evt, data, dedupId) {
-    if (dedupId && deduplicate(dedupId)) return;
-
+  dispatchToSubscriptions(evt, data) {
     this.subscriptions.forEach((s) => {
       if (s.evt !== evt || !containsFilteredValues(data, s.args)) return;
-
-      this.dispatch(null, APICommands.DISPATCH, s.evt, data);
-    });
-  }
-
-  mountListeners(client) {
-    client.on('guildCreate', (guild) => {
-      const event = this.events[APIEvents.GUILD_CREATE];
-      this.dispatchToSubscriptions(APIEvents.GUILD_CREATE, event.handler({
-        server: this,
-        client: this.client,
-        args: guild,
-      }));
-    });
-
-    client.on('message', (message) => {
-      const event = this.events[APIEvents.MESSAGE_CREATE];
-      this.dispatchToSubscriptions(APIEvents.MESSAGE_CREATE, event.handler({
-        server: this,
-        client: this.client,
-        args: message,
-      }));
-    });
-
-    client.on('messageUpdate', (message) => {
-      const event = this.events[APIEvents.MESSAGE_UPDATE];
-      this.dispatchToSubscriptions(APIEvents.MESSAGE_UPDATE, event.handler({
-        server: this,
-        client: this.client,
-        args: message,
-      }));
-    });
-
-    client.on('messageDelete', (message) => {
-      const event = this.events[APIEvents.MESSAGE_DELETE];
-      this.dispatchToSubscriptions(APIEvents.MESSAGE_DELETE, event.handler({
-        server: this,
-        client: this.client,
-        args: message,
-      }));
+      s.dispatch(data);
     });
   }
 }

@@ -1,14 +1,11 @@
-const APIError = require('./APIError');
-const { APIErrors, APIEvents } = require('../Constants');
+const { APIEvents } = require('../Constants');
 const {
   transformTextMessage,
   transformGuild,
 } = require('./APIHelpers');
 
-function messageEvents({ client, args }) {
-  const channel = client.channels.get(args.channel_id);
-  if (args.channel_id && !channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
-  return transformTextMessage(args);
+function messageEvents({ args: [message] }) {
+  return transformTextMessage(message);
 }
 
 module.exports = {
@@ -25,8 +22,8 @@ module.exports = {
   },
 
   [APIEvents.GUILD_CREATE]: {
-    handler({ args, client }) {
-      return transformGuild(client.guilds.get(args.id));
+    handler({ args: [{ id }], client }) {
+      return transformGuild(client.guilds.get(id));
     },
   },
 

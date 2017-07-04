@@ -45,7 +45,9 @@ bouncer.stdout.on('data', (message) => {
     //   channel_id: '222079895583457280',
     //   content: 'hi!',
     // }).then(console.log);
-    send('SUBSCRIBE', 'MESSAGE_CREATE').then(console.log).catch(console.error);
+    send('SUBSCRIBE', 'MESSAGE_CREATE', {
+      channel_id: '222079895583457280',
+    }).then(console.log).catch(console.error);
   } else {
     console.log(payload);
   }

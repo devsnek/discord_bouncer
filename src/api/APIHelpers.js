@@ -1,19 +1,5 @@
 const DJSConstants = require('discord.js/src/util/Constants');
 const deepEqual = require('../utils/deep_equal');
-const crypto = require('crypto');
-
-const DEDUP_IDS = [];
-
-function deduplicate(id) {
-  if (DEDUP_IDS.indexOf(id) > -1) return true;
-  DEDUP_IDS.unshift(id);
-  DEDUP_IDS.splice(50);
-  return false;
-}
-
-function getUniqueIdentifier(thing) {
-  return crypto.createHash('md5').update(JSON.stringify(thing)).digest('hex');
-}
 
 function pick(obj, keys) {
   return keys.reduce((o, k) => {
@@ -169,9 +155,7 @@ module.exports = {
   transformTextMessage,
   transformEmbed,
   transformAttachment,
-  deduplicate,
   containsSameValues,
   containsFilteredValues,
-  getUniqueIdentifier,
   pick,
 };
