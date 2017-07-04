@@ -8,7 +8,11 @@ const bouncer = child_process.spawn('./src/discord_bouncer.js');
 const expecting = new Map();
 
 const send = (cmd, evt, args = {}) => {
-  if (typeof evt !== 'string') {
+  if (typeof cmd === 'object') {
+    evt = cmd.evt;
+    args = cmd.args;
+    cmd = cmd.cmd;
+  } else if (typeof evt !== 'string') {
     args = evt;
     evt = undefined;
   }
@@ -19,12 +23,12 @@ const send = (cmd, evt, args = {}) => {
   return promise;
 };
 
-bouncer.stdout.on('data', (message) => {
+bouncer.stdout.on('data', (data) => {
   let payload;
   try {
-    payload = JSON.parse(message);
+    payload = JSON.parse(data);
   } catch (err) {
-    console.log('AAAA', message.toString());
+    console.log('AAAA', data.toString());
     return;
   }
 
@@ -42,14 +46,35 @@ bouncer.stdout.on('data', (message) => {
   } else if (payload.cmd === 'AUTHENTICATE') {
     console.log('READY!');
     send('SUBSCRIBE', 'MESSAGE_CREATE');
-    send('DISPATCH', 'STATUS_UPDATE', {
-      game: { name: 'memes' },
-    }).then(console.log);
   } else if (payload.evt === 'MESSAGE_CREATE') {
-    if (payload.data.content !== '!ping') return;
-    send('DISPATCH', 'MESSAGE_CREATE', {
-      channel_id: payload.data.channel_id,
-      content: 'pong!',
-    });
+    const message = payload.data;
+    const content = message.content;
+    if (!content.startsWith('```json') && content.endsWith('```')) return;
+    let body;
+    try {
+      body = JSON.parse(content.replace(/(^```json|```$)/g, '').trim());
+    } catch (err) {
+      return;
+    }
+    const { command, args } = body;
+    const reply = (output = null, error = false) => {
+      send('DISPATCH', 'MESSAGE_CREATE',
+        Object.assign({ channel_id: payload.data.channel_id }, {
+          content: `\`\`\`json\n${JSON.stringify({ output, error }, null, '  ')}\n\`\`\``,
+        }));
+    };
+    switch (command) {
+      case 'ping':
+        reply({
+          time: Date.now() - message.timestamp,
+          unit: 'ms',
+        });
+        break;
+      case 'bounce':
+        send(args);
+        break;
+      default:
+        break;
+    }
   }
 });
