@@ -5,11 +5,12 @@ module.exports = ({ server, client }) => {
     if (!server.events[external]) continue;
     client.on(internal, (...args) => {
       const event = server.events[external];
-      server.dispatchToSubscriptions(external, event.handler({
+      Promise.resolve(event.handler({
         server,
         client,
         args,
-      }));
+      }))
+      .then((data) => server.dispatchToSubscriptions(external, data));
     });
   }
 };

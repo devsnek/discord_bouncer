@@ -2,6 +2,7 @@ const { APIEvents } = require('../Constants');
 const {
   transformTextMessage,
   transformGuild,
+  transformChannel,
 } = require('./APIHelpers');
 
 function messageEvents({ args: [message] }) {
@@ -28,8 +29,9 @@ module.exports = {
   },
 
   [APIEvents.CHANNEL_CREATE]: {
-    handler: noop,
+    handler({ args: [channel], client }) {
+      const canRead = !channel.permissionsFor || channel.permissionsFor(client.user).has('READ_MESSAGES');
+      return transformChannel(channel, canRead);
+    },
   },
 };
-
-function noop() {} // eslint-disable-line no-empty-function,
