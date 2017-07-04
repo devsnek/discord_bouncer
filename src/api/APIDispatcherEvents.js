@@ -30,4 +30,24 @@ module.exports = {
         .then((m) => transformTextMessage(m));
     },
   },
+
+  STATUS_UPDATE: {
+    validation: () =>
+      joi.object().required().keys({
+        idle_since: joi.number().integer().optional(),
+        afk: joi.boolean().optional(),
+        game: joi.object().optional().keys({
+          name: joi.string().required(),
+          type: joi.number().integer().optional(),
+          url: joi.string().optional(),
+        }),
+      }),
+    handler({ client, args }) {
+      return client.user.setPresence({
+        since: args.idle_since,
+        afk: args.afk,
+        game: args.game,
+      }).then(() => args);
+    },
+  },
 };

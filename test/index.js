@@ -39,7 +39,14 @@ bouncer.stdout.on('data', (message) => {
       token: auth.token,
     });
   } else if (payload.cmd === 'AUTHENTICATE') {
+    console.log('READY!');
     send('SUBSCRIBE', 'MESSAGE_CREATE');
+    send('DISPATCH', 'STATUS_UPDATE', {
+      afk: false,
+      game: {
+        name: 'memes',
+      },
+    }).then(console.log);
   } else if (payload.evt === 'MESSAGE_CREATE') {
     if (payload.data.content !== '!ping') return;
     send('DISPATCH', 'MESSAGE_CREATE', {
