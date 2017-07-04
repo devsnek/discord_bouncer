@@ -16,7 +16,7 @@ module.exports = {
     },
   },
 
-  [APIEvents.MESSAGE_EDIT]: {
+  [APIEvents.MESSAGE_UPDATE]: {
     validation: () =>
       joi.object().required().keys({
         channel_id: joi.string().required(),
@@ -25,8 +25,9 @@ module.exports = {
     handler({ client, args }) {
       const channel = client.channels.get(args.channel_id);
       if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
+      const content = args.content || null;
       return channel.fetchMessage(args.message_id)
-        .then((message) => message.edit(args))
+        .then((message) => message.edit(content, args))
         .then((m) => transformTextMessage(m));
     },
   },

@@ -16,7 +16,7 @@ module.exports = {
     handler({ server, client, evt, args }) {
       const promise = Promise.create();
       const event = APIDispatcherEvents[evt];
-      if (!event) throw new APIError(APIError.INVALID_EVENT, evt);
+      if (!event) throw new APIError(APIErrors.INVALID_EVENT, evt);
       if (event.validation) {
         joi.validate(args, event.validation(), {
           convert: false,
