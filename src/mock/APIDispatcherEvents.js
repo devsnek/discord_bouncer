@@ -255,16 +255,39 @@ module.exports = {
 
 
   /**
-   * SPEAKING EVENTS
-   */
-  [APIEvents.SPEAKING_START]: {},
-  [APIEvents.SPEAKING_STOP]: {},
-
-  /**
    * TYPING EVENTS
    */
-  [APIEvents.TYPING_START]: {},
-  [APIEvents.TYPING_STOP]: {},
+
+  [APIEvents.TYPING_START]: {
+    validation: () =>
+      joi.object().required().keys({
+        channel_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const channel = client.channels.get(args.channel_id);
+      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
+      return channel.startTyping().then(() => channel.typing);
+    },
+  },
+
+  [APIEvents.TYPING_STOP]: {
+    validation: () =>
+      joi.object().required().keys({
+        channel_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const channel = client.channels.get(args.channel_id);
+      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
+      return channel.stopTyping(true).then(() => channel.typing);
+    },
+  },
+
+  /**
+   * SPEAKING EVENTS
+   */
+
+  [APIEvents.SPEAKING_START]: {},
+  [APIEvents.SPEAKING_STOP]: {},
 
   STATUS_UPDATE: {
     validation: () =>
