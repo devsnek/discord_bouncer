@@ -96,13 +96,6 @@ class MockAPI extends EventEmitter {
     return Promise.resolve(this);
   }
 
-  handleGlobalRejection(_, err) {
-    this.error(null, null, err.code, err.message);
-  }
-  handleGlobalException(err) {
-    this.error(null, null, err.code, err.message);
-  }
-
   addSubscription(evt, args) {
     const dispatch = this.dispatch.bind(this, null, APICommands.DISPATCH, evt);
 
@@ -131,6 +124,13 @@ class MockAPI extends EventEmitter {
       s.dispatch(data);
     });
     return this;
+  }
+
+  globalRejection(_, err) {
+    this.error(null, null, err.code, err.message);
+  }
+  globalException(err) {
+    this.error(null, null, err.code, err.message);
   }
 }
 

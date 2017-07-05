@@ -25,6 +25,17 @@ module.exports = {
     },
   },
 
+  GET_GUILD_AUDIT_LOG: {
+    validation: () =>
+      joi.object().required().keys({
+        guild_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      if (!client.guilds.has(args.guild_id)) throw new APIError(APIErrors.INVALID_GUILD, args.guild_id);
+      return client.api.guilds[args.guild_id]['audit-logs'].get({ query: args });
+    },
+  },
+
   /**
    * CHANNEL EVENTS
    */
@@ -90,7 +101,10 @@ module.exports = {
       })
       .then((u) => {
         if (typeof u === 'string') return { id: u };
-        return transformUser(u.user ? u.user : u);
+        return {
+          reason: args.reason,
+          user: transformUser(u.user ? u.user : u),
+        };
       });
     },
   },

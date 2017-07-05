@@ -5,6 +5,8 @@ const {
   RPC_START_PORT,
   RPC_END_PORT,
   APIErrors,
+  APICommands,
+  APIEvents,
 } = require('../Constants');
 
 let port = RPC_START_PORT;
@@ -78,6 +80,33 @@ class RPCConnection extends EventEmitter {
 
   handle(message) {
     if (ws) ws.send(message);
+  }
+
+  dispatch(
+    nonce = null,
+    cmd = APICommands.DISPATCH,
+    evt = null,
+    data = null
+  ) {
+    this.emit('out', { cmd, data, evt, nonce, interface: 'mock' });
+    return this;
+  }
+
+  error(
+    nonce = null,
+    cmd = APICommands.DISPATCH,
+    code = APIErrors.UNKNOWN_ERROR,
+    message = 'Unknown Error'
+  ) {
+    this.dispatch(nonce, cmd, APIEvents.ERROR, { code, message });
+    return this;
+  }
+
+  gloablRejection(_, err) {
+    this.error(null, null, err.code, err.message);
+  }
+  globalException(err) {
+    this.error(null, null, err.code, err.message);
   }
 }
 
