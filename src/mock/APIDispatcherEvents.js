@@ -6,6 +6,7 @@ const {
   transformGuild,
   transformChannel,
   transformUser,
+  transformInvite,
 } = require('./APIHelpers');
 
 module.exports = {
@@ -154,9 +155,40 @@ module.exports = {
    * INVITE EVENTS
    */
 
-  [APIEvents.INVITE_CREATE]: {},
+  [APIEvents.INVITE_CREATE]: {
+    validation: () =>
+      joi.object().required().keys({
+        channel_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const channel = client.channels.get(args.channel_id);
+      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
+      return channel.createInvite({
+        temporary: args.temporary,
+        max_age: args.maxAge,
+        max_uses: args.maxUses,
+        unique: args.unique,
+        reason: args.reason,
+      }).then((i) => transformInvite(i));
+    },
+  },
+
   [APIEvents.INVITE_UPDATE]: {},
-  [APIEvents.INVITE_DELETE]: {},
+
+  [APIEvents.INVITE_DELETE]: {
+    validation: () =>
+      joi.object().required().keys({
+        channel_id: joi.snowflake().required(),
+        invite_code: joi.string().required(),
+      }),
+    handler({ client, args }) {
+      const channel = client.channels.get(args.channel_id);
+      if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
+      return channel.fetchInvite(args.invite_code)
+        .then((i) => i.delete())
+        .then((i) => transformInvite(i));
+    },
+  },
 
   /**
    * WEBHOOK EVENTS

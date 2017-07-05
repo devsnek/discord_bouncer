@@ -19,12 +19,13 @@ function containsFilteredValues(obj, filter) {
   return true;
 }
 
-function transformGuild(guild) {
+function transformGuild(guild, invite = false) {
   return {
     id: guild.id,
     name: guild.name,
-    icon_url: guild.iconURL(),
-    members: guild.members
+    icon: guild.icon,
+    icon_url: invite ? undefined : guild.iconURL(),
+    members: invite ? undefined : guild.members
     .filter(({ presence }) => presence.status && presence.status !== 'offline')
     .map((member) => ({
       user: transformUser(member.user),
@@ -147,6 +148,24 @@ function transformAttachment(a) {
   };
 }
 
+function transformInvite(i) {
+  return {
+    code: i.code,
+    guild: transformGuild(i.guild, true),
+    channel: {
+      id: i.channel.id,
+      name: i.channel.name,
+      type: i.channel.type,
+    },
+    inviter: transformUser(i.inviter),
+    max_uses: i.maxUses,
+    max_age: i.maxAge,
+    temporary: i.temporary,
+    created_at: i.createdTimestamp,
+    revoked: i.revoked,
+  };
+}
+
 module.exports = {
   transformGuild,
   transformUser,
@@ -154,6 +173,7 @@ module.exports = {
   transformTextMessage,
   transformEmbed,
   transformAttachment,
+  transformInvite,
   containsSameValues,
   containsFilteredValues,
   pick,
