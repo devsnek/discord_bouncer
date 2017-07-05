@@ -1,5 +1,6 @@
 require('promise_util');
 const net = require('net');
+const path = require('path');
 const { Snowflake } = require('discord.js');
 
 module.exports = (data) => {
@@ -20,5 +21,5 @@ module.exports = (data) => {
   }, 10e3);
   promise.then(() => clearTimeout(timeout));
 
-  return { promise, file };
+  return { promise, file: path.resolve(file) };
 };
