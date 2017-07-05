@@ -266,7 +266,7 @@ module.exports = {
     handler({ client, args }) {
       const channel = client.channels.get(args.channel_id);
       if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
-      return channel.startTyping().then(() => channel.typing);
+      return channel.startTyping().then(() => ({ typing: channel.typing }));
     },
   },
 
@@ -278,7 +278,7 @@ module.exports = {
     handler({ client, args }) {
       const channel = client.channels.get(args.channel_id);
       if (!channel) throw new APIError(APIErrors.INVALID_CHANNEL, args.channel_id);
-      return channel.stopTyping(true).then(() => channel.typing);
+      return channel.stopTyping(true).then(() => ({ typing: channel.typing }));
     },
   },
 
