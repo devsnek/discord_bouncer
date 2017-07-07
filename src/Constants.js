@@ -69,7 +69,6 @@ exports.APIEvents = keyMirror([
 
 exports.APIErrors = {
   UNKNOWN_ERROR: 1000,
-
   CLOSE_ABNORMAL: 1006,
 
   INVALID_PAYLOAD: 4000,
@@ -87,6 +86,8 @@ exports.APIErrors = {
 
 exports.APIErrorsInternal = {
   1000: (message) => message,
+  1006: (message) => message,
+
   4000: (message) => message,
   4002: (cmd) => `Invalid command: ${cmd}`,
   4003: (guild_id) => `Invalid guild id: ${guild_id}`,
@@ -94,6 +95,7 @@ exports.APIErrorsInternal = {
   4005: (channel_id) => `Invalid channel id: ${channel_id}`,
   4009: (token) => `Invalid token: ${token}`,
   4010: (user_id) => `Invalid user id: ${user_id}`,
+  4011: (code) => `Invalid invite code: ${code}`,
 };
 
 exports.RPC_START_PORT = 6463;

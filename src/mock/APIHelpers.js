@@ -166,6 +166,19 @@ function transformInvite(i) {
   };
 }
 
+function transformRole(r) {
+  return {
+    id: r.id,
+    name: r.name,
+    color: r.color,
+    hoist: r.hoist,
+    position: r.calculatedPosition,
+    permissions: r.permissions,
+    managed: r.managed,
+    mentionable: r.mentionable,
+  };
+}
+
 module.exports = {
   transformGuild,
   transformUser,

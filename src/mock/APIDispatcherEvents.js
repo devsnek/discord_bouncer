@@ -7,6 +7,7 @@ const {
   transformChannel,
   transformUser,
   transformInvite,
+  transformRole,
 } = require('./APIHelpers');
 
 module.exports = {
@@ -147,9 +148,50 @@ module.exports = {
    * ROLE EVENTS
    */
 
-  [APIEvents.ROLE_CREATE]: {},
-  [APIEvents.ROLE_UPDATE]: {},
-  [APIEvents.ROLE_DELETE]: {},
+  [APIEvents.ROLE_CREATE]: {
+    validation: () =>
+      joi.object().required().keys({
+        guild_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const guild = client.guilds.get(args.guild_id);
+      if (!guild) throw new APIError(APIErrors.INVALID_GUILD, args.guild_id);
+      return guild.createRole({
+        data: args,
+        reason: args.reason,
+      }).then((r) => transformRole(r));
+    },
+  },
+
+  [APIEvents.ROLE_UPDATE]: {
+    validation: () =>
+      joi.object().required().keys({
+        guild_id: joi.snowflake().required(),
+        role_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const guild = client.guilds.get(args.guild_id);
+      if (!guild) throw new APIError(APIErrors.INVALID_GUILD, args.guild_id);
+      const role = guild.roles.get(args.role_id);
+      if (!role) throw new APIError(APIErrors.INVALID_ROLE, args.role_id);
+      return role.edit(args, args.reason).then((r) => transformRole(r));
+    },
+  },
+
+  [APIEvents.ROLE_DELETE]: {
+    validation: () =>
+      joi.object().required().keys({
+        guild_id: joi.snowflake().required(),
+        role_id: joi.snowflake().required(),
+      }),
+    handler({ client, args }) {
+      const guild = client.guilds.get(args.guild_id);
+      if (!guild) throw new APIError(APIErrors.INVALID_GUILD, args.guild_id);
+      const role = guild.roles.get(args.role_id);
+      if (!role) throw new APIError(APIErrors.INVALID_ROLE, args.role_id);
+      return role.delete(args.reason).then((r) => transformRole(r));
+    },
+  },
 
   /**
    * INVITE EVENTS

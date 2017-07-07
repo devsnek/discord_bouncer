@@ -29,7 +29,9 @@ const send = (cmd, evt, args = {}) => {
 };
 
 
-bouncer.stdout.on('data', (data) => {
+bouncer.stdout.on('data', handleData);
+
+function handleData(data) {
   data = data.toString().trim();
   let payload;
   try {
@@ -39,35 +41,16 @@ bouncer.stdout.on('data', (data) => {
     return;
   }
 
-  console.log('->', data);
+  if (Buffer.byteLength(data) < 8192) {
+    console.log('->', data);
+  } else {
+    console.log('-> (LONG)', JSON.stringify({ cmd: payload.cmd, evt: payload.evt, nonce: payload.nonce }));
+  }
 
   if (expecting.has(payload.nonce)) {
     const p = expecting.get(payload.nonce);
     if (payload.evt === 'ERROR') p.reject(new Error(payload.data.message));
-    if (payload.cmd === 'UNIX_DOMAIN_SOCKET_UPGRADE') {
-      switch (payload.evt) {
-        case 'CREATE': {
-          const socket = net.connect(payload.data.file);
-          const chunks = [];
-          socket.on('data', (chunk) => chunks.push(chunk));
-          socket.on('end', () => {
-            expecting.delete(payload.nonce);
-            try {
-              p.resolve(JSON.parse(Buffer.concat(chunks)));
-            } catch (err) {
-              p.reject(new Error('Invalid data from unix domain socket'));
-            }
-          });
-          break;
-        }
-        case 'DELETE':
-          expecting.delete(payload.nonce);
-          if (!payload.data.success) p.reject(new Error('Unix Domain Socket connection timed out'));
-          break;
-        default:
-          break;
-      }
-    } else {
+    if (payload.cmd !== 'UNIX_DOMAIN_SOCKET_UPGRADE') {
       expecting.delete(payload.nonce);
       p.resolve(payload);
     }
@@ -81,7 +64,25 @@ bouncer.stdout.on('data', (data) => {
     });
   } else if (payload.cmd === 'AUTHENTICATE') {
     console.log('READY!');
-    send('SUBSCRIBE', 'MESSAGE_CREATE');
+    send('SUBSCRIBE', 'MESSAGE_CREATE', {
+      // channel_id: '201803114049699849',
+    });
+  } else if (payload.cmd === 'UNIX_DOMAIN_SOCKET_UPGRADE') {
+    switch (payload.evt) {
+      case 'CREATE': {
+        const socket = net.connect(payload.data.file);
+        const chunks = [];
+        socket.on('data', (chunk) => chunks.push(chunk));
+        socket.on('end', () => {
+          handleData(Buffer.concat(chunks));
+        });
+        break;
+      }
+      case 'DELETE':
+        break;
+      default:
+        break;
+    }
   } else if (payload.evt === 'MESSAGE_CREATE') {
     const message = payload.data;
     const content = message.content;
@@ -107,10 +108,10 @@ bouncer.stdout.on('data', (data) => {
         });
         break;
       case 'bounce':
-        send(args);
+        send(args).then(() => console.log('OMG BOUNCE WORKED'));
         break;
       default:
         break;
     }
   }
-});
+}

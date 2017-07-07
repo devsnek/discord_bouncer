@@ -9,7 +9,7 @@ module.exports = (data) => {
   const promise = Promise.create();
 
   const server = net.createServer((c) => {
-    c.write(JSON.stringify(data));
+    c.write(typeof data === 'string' ? data : JSON.stringify(data));
     c.end();
     c.on('end', () => {
       server.close();
