@@ -99,7 +99,7 @@ function handleData(data) {
         reply(`${Date.now() - message.timestamp}ms`);
         break;
       case 'bounce':
-	const packet = JSON.parse(args.join(' ').replace(/^```json|```$/g, ''));
+        const packet = JSON.parse(args.join(' ').replace(/^```json|```$/g, ''));
         send(packet).then(() => console.log('Bounce success'));
         break;
       default:
