@@ -35,7 +35,7 @@ module.exports = {
   },
 
   [APIEvents.GUILD_DELETE]: {
-    handler({ args: [guild]) {
+    handler({ args: [guild] }) {
       return transformGuild(guild);
     },
   },

@@ -86,29 +86,21 @@ function handleData(data) {
   } else if (payload.evt === 'MESSAGE_CREATE') {
     const message = payload.data;
     const content = message.content;
-    if (!content.startsWith('```json') || !content.endsWith('```')) return;
-    let body;
-    try {
-      body = JSON.parse(content.replace(/(^```json|```$)/g, '').trim());
-    } catch (err) {
-      return;
-    }
-    const { command, args } = body;
-    const reply = (output = null, error = false) => {
-      send('DISPATCH', 'MESSAGE_CREATE',
-        Object.assign({ channel_id: payload.data.channel_id }, {
-          content: `\`\`\`json\n${JSON.stringify({ output, error }, null, '  ')}\n\`\`\``,
-        }));
+    if (!content.startsWith('t!')) return;
+    const [command, ...args] = content.replace('t!', '').trim().split(' ');
+    const reply = (content) => {
+      send('DISPATCH', 'MESSAGE_CREATE', {
+        channel_id: payload.data.channel_id,
+        content,
+      });
     };
     switch (command) {
       case 'ping':
-        reply({
-          time: Date.now() - message.timestamp,
-          unit: 'ms',
-        });
+        reply(`${Date.now() - message.timestamp}ms`);
         break;
       case 'bounce':
-        send(args).then(() => console.log('OMG BOUNCE WORKED'));
+	const packet = JSON.parse(args.join(' ').replace(/^```json|```$/g, ''));
+        send(packet).then(() => console.log('Bounce success'));
         break;
       default:
         break;
