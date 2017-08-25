@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 require('promise_util');
 const auth = require('./auth');
 const child_process = require('child_process');
@@ -88,21 +90,22 @@ function handleData(data) {
     const content = message.content;
     if (!content.startsWith('t!')) return;
     const [command, ...args] = content.replace('t!', '').trim().split(' ');
-    const reply = (content) => {
+    const reply = (c) => {
       send('DISPATCH', 'MESSAGE_CREATE', {
         channel_id: payload.data.channel_id,
-        content,
+        content: c,
       });
     };
     switch (command) {
       case 'ping':
         reply(`${Date.now() - message.timestamp}ms`);
         break;
-      case 'bounce':
+      case 'bounce': {
         if (message.author.id !== auth.owner) return;
         const packet = JSON.parse(args.join(' ').replace(/^```json|```$/g, ''));
         send(packet).then(() => console.log('Bounce success'));
         break;
+      }
       case 'eval':
         if (message.author.id !== auth.owner) return;
         try {

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* eslint-disable no-console */
 
 const snekparse = require('snekparse');
 if (!process.env.NODE_ENV) process.env.NODE_ENV = 'production';
