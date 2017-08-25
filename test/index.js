@@ -99,8 +99,15 @@ function handleData(data) {
         reply(`${Date.now() - message.timestamp}ms`);
         break;
       case 'bounce':
+        if (message.author.id !== auth.owner) return;
         const packet = JSON.parse(args.join(' ').replace(/^```json|```$/g, ''));
         send(packet).then(() => console.log('Bounce success'));
+        break;
+      case 'eval':
+        if (message.author.id !== auth.owner) return;
+        try {
+          eval(args.join(' '));
+        } catch (err) {} // eslint-disable-line no-empty      
         break;
       default:
         break;

@@ -1,4 +1,4 @@
-const DJSConstants = require('discord.js/src/util/Constants');
+const { MessageTypes } = require('discord.js').Constants;
 const deepEqual = require('../utils/deep_equal');
 
 function pick(obj, keys) {
@@ -23,35 +23,39 @@ function transformGuild(guild, invite = false) {
   return {
     id: guild.id,
     name: guild.name,
-    icon: guild.icon,
     icon_url: invite ? undefined : guild.iconURL(),
     members: invite ? undefined : guild.members
       .filter(({ presence }) => presence.status && presence.status !== 'offline')
-      .map((member) => ({
-        user: transformUser(member.user),
-        nick: member.nick,
-        status: member.presence.status,
-        activity: member.presence.game ? member.presence.game.name : undefined,
-      })),
+      .map(transformMember),
   };
 }
 
-function transformChannel(channel, fetchMessages) {
-  const guild = channel.guild || null;
+function transformMember(m) {
+  return {
+    user: transformUser(m.user),
+    nick: m.nick,
+    status: m.presence.status,
+    activity: m.presence.game ? m.presence.game.name : null,
+  };
+}
 
-  return (fetchMessages ? channel.fetchMessages({ limit: 50 }) : Promise.resolve([]))
-    .then((messages) => ({
-      id: channel.id,
-      name: channel.name,
-      type: channel.type,
-      topic: channel.topic,
-      bitrate: channel.bitrate,
-      user_limit: channel.userLimit,
-      guild_id: guild ? guild.id : null,
-      position: channel.calculatedPosition,
-      messages,
-      voice_states: [],
-    }));
+async function transformChannel(channel, fetchMessages) {
+  const guild = channel.guild;
+  const messages = fetchMessages ? await channel.fetchMessages({ limit: 50 }) : [];
+
+  return {
+    id: channel.id,
+    name: channel.name,
+    type: channel.type,
+    topic: channel.topic,
+    bitrate: channel.bitrate,
+    user_limit: channel.userLimit,
+    nsfw: channel.nsfw,
+    guild_id: guild ? guild.id : null,
+    position: channel.calculatedPosition,
+    messages,
+    voice_states: [],
+  };
 }
 
 function transformUser({ id, username, discriminator, avatar, bot }) {
@@ -65,9 +69,9 @@ function transformUser({ id, username, discriminator, avatar, bot }) {
 }
 
 function transformTextMessage(m) {
-  const member = m.member || null;
-  let author_color;
-  let nick;
+  const member = m.member;
+  let author_color = null;
+  let nick = null;
   if (member) {
     author_color = member.displayHexColor;
     nick = member.nickname;
@@ -80,7 +84,7 @@ function transformTextMessage(m) {
     bot: m.author.bot,
     channel_id: m.channel.id,
     content: m.content,
-    content_parsed: undefined,
+    content_parsed: [],
     nick,
     author_color,
     edited_timestamp: m.editedTimestamp,
@@ -88,12 +92,12 @@ function transformTextMessage(m) {
     tts: m.tts,
     mentions: m.mentions.users.map(transformUser),
     mention_everyone: m.mentions.everyone,
-    mention_roles: Array.from(m.mentions.roles),
+    mention_roles: Array.from(m.mentions.roles).map(transformRole),
     embeds: m.embeds.map(transformEmbed),
     attachments: m.attachments.map(transformAttachment),
     author: m.author ? transformUser(m.author) : undefined,
     pinned: m.pinned,
-    type: DJSConstants.MessageTypes.indexOf(m.type),
+    type: MessageTypes.indexOf(m.type),
   };
 }
 
@@ -166,18 +170,18 @@ function transformInvite(i) {
   };
 }
 
-// function transformRole(r) {
-//   return {
-//     id: r.id,
-//     name: r.name,
-//     color: r.color,
-//     hoist: r.hoist,
-//     position: r.calculatedPosition,
-//     permissions: r.permissions,
-//     managed: r.managed,
-//     mentionable: r.mentionable,
-//   };
-// }
+function transformRole(r) {
+  return {
+    id: r.id,
+    name: r.name,
+    color: r.color,
+    hoist: r.hoist,
+    position: r.calculatedPosition,
+    permissions: r.permissions,
+    managed: r.managed,
+    mentionable: r.mentionable,
+  };
+}
 
 
 module.exports = {
