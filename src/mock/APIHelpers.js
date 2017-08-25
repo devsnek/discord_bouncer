@@ -41,7 +41,7 @@ function transformMember(m) {
 
 async function transformChannel(channel, fetchMessages) {
   const guild = channel.guild;
-  const messages = fetchMessages ? await channel.fetchMessages({ limit: 50 }) : [];
+  const messages = fetchMessages ? await channel.messages.fetch({ limit: 50 }) : [];
 
   return {
     id: channel.id,
@@ -53,7 +53,7 @@ async function transformChannel(channel, fetchMessages) {
     nsfw: channel.nsfw,
     guild_id: guild ? guild.id : null,
     position: channel.calculatedPosition,
-    messages,
+    messages: messages.map(transformTextMessage),
     voice_states: [],
   };
 }
