@@ -101,13 +101,13 @@ module.exports = {
         reason: args.reason,
         days: args['delete-message-days'],
       })
-      .then((u) => {
-        if (typeof u === 'string') return { id: u };
-        return {
-          reason: args.reason,
-          user: transformUser(u.user ? u.user : u),
-        };
-      });
+        .then((u) => {
+          if (typeof u === 'string') return { id: u };
+          return {
+            reason: args.reason,
+            user: transformUser(u.user ? u.user : u),
+          };
+        });
     },
   },
 
@@ -121,10 +121,10 @@ module.exports = {
       const guild = client.guilds.get(args.guild_id);
       if (!guild) throw new APIError(APIErrors.INVALID_GUILD, args.guild_id);
       return guild.unban(args.member_id, args.reason)
-      .then((u) => {
-        if (typeof u === 'string') return { id: u };
-        return transformUser(u.user || u);
-      });
+        .then((u) => {
+          if (typeof u === 'string') return { id: u };
+          return transformUser(u.user || u);
+        });
     },
   },
 

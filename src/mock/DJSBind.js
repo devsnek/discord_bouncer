@@ -10,7 +10,7 @@ module.exports = ({ server, client }) => {
         client,
         args,
       }))
-      .then((data) => server.dispatchToSubscriptions(external, data));
+        .then((data) => server.dispatchToSubscriptions(external, data));
     });
   }
 };

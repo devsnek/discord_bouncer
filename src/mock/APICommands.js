@@ -21,7 +21,7 @@ module.exports = {
         joi.validate(args, event.validation(), {
           convert: false,
           allowUnknown: true,
-        }, err => {
+        }, (err) => {
           if (err) throw new APIError(APIErrors.INVALID_PAYLOAD, err.message);
           promise.resolve(event.handler({ server, client, evt, args }));
         });
@@ -64,7 +64,7 @@ module.exports = {
   [APICommands.GET_GUILDS]: {
     handler({ client }) {
       return {
-        guilds: client.guilds.map(guild => ({
+        guilds: client.guilds.map((guild) => ({
           id: guild.id,
           name: guild.name,
           icon_url: guild.iconURL(),
@@ -102,7 +102,7 @@ module.exports = {
 
   [APICommands.SUBSCRIBE]: {
     handler({ server, evt, args }) {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         if (!server.events[evt]) throw new APIError(APIErrors.INVALID_EVENT, evt);
         setImmediate(() => server.addSubscription(evt, args));
         resolve({ evt });

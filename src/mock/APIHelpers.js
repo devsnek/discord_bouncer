@@ -26,13 +26,13 @@ function transformGuild(guild, invite = false) {
     icon: guild.icon,
     icon_url: invite ? undefined : guild.iconURL(),
     members: invite ? undefined : guild.members
-    .filter(({ presence }) => presence.status && presence.status !== 'offline')
-    .map((member) => ({
-      user: transformUser(member.user),
-      nick: member.nick,
-      status: member.presence.status,
-      activity: member.presence.game ? member.presence.game.name : undefined,
-    })),
+      .filter(({ presence }) => presence.status && presence.status !== 'offline')
+      .map((member) => ({
+        user: transformUser(member.user),
+        nick: member.nick,
+        status: member.presence.status,
+        activity: member.presence.game ? member.presence.game.name : undefined,
+      })),
   };
 }
 
@@ -40,18 +40,18 @@ function transformChannel(channel, fetchMessages) {
   const guild = channel.guild || null;
 
   return (fetchMessages ? channel.fetchMessages({ limit: 50 }) : Promise.resolve([]))
-  .then((messages) => ({
-    id: channel.id,
-    name: channel.name,
-    type: channel.type,
-    topic: channel.topic,
-    bitrate: channel.bitrate,
-    user_limit: channel.userLimit,
-    guild_id: guild ? guild.id : null,
-    position: channel.calculatedPosition,
-    messages,
-    voice_states: [],
-  }));
+    .then((messages) => ({
+      id: channel.id,
+      name: channel.name,
+      type: channel.type,
+      topic: channel.topic,
+      bitrate: channel.bitrate,
+      user_limit: channel.userLimit,
+      guild_id: guild ? guild.id : null,
+      position: channel.calculatedPosition,
+      messages,
+      voice_states: [],
+    }));
 }
 
 function transformUser({ id, username, discriminator, avatar, bot }) {
@@ -166,18 +166,19 @@ function transformInvite(i) {
   };
 }
 
-function transformRole(r) {
-  return {
-    id: r.id,
-    name: r.name,
-    color: r.color,
-    hoist: r.hoist,
-    position: r.calculatedPosition,
-    permissions: r.permissions,
-    managed: r.managed,
-    mentionable: r.mentionable,
-  };
-}
+// function transformRole(r) {
+//   return {
+//     id: r.id,
+//     name: r.name,
+//     color: r.color,
+//     hoist: r.hoist,
+//     position: r.calculatedPosition,
+//     permissions: r.permissions,
+//     managed: r.managed,
+//     mentionable: r.mentionable,
+//   };
+// }
+
 
 module.exports = {
   transformGuild,

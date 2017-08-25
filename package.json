@@ -4,7 +4,8 @@
   "description": "",
   "main": "./src/discord_bouncer.js",
   "scripts": {
-    "build": "pkg ./package.json --out-path=./build"
+    "build": "pkg ./package.json --out-path=./build",
+    "lint": "eslint -c .eslintrc.json src"
   },
   "repository": {
     "type": "git",
@@ -24,7 +25,9 @@
     "snekparse": "github:devsnek/snekparse",
     "uws": "^8.14.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^4.5.0"
+  },
   "bin": "./src/discord_bouncer.js",
   "pkg": {
     "scripts": "./src/**/*.js"

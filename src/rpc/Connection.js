@@ -25,7 +25,7 @@ class RPCConnection extends EventEmitter {
 
     ws = new WebSocket(`wss://discordapp.io:${port}/?v=1&client_id=${client_id}`);
 
-    ws.onmessage = e => {
+    ws.onmessage = (e) => {
       let payload;
       try {
         if (typeof e.data === 'string') {

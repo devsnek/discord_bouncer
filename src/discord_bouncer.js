@@ -46,7 +46,7 @@ process.stdin.on('data', (chunk) => {
   try {
     payload = JSON.parse(chunk);
   } catch (err) {
-    return;
+    return null;
   }
 
   if (payload.cmd === 'SELECT') {
@@ -60,14 +60,14 @@ process.stdin.on('data', (chunk) => {
       args: { message: 'Invalid interface' },
       nonce: payload.nonce,
     });
-    return;
+    return null;
   }
   api.on('out', write);
 
   process.on('unhandledRejection', api.globalRejection.bind(api));
   process.on('uncaughtException', api.globalException.bind(api));
 
-  api.start(payload.args);
+  return api.start(payload.args);
 });
 
 write({

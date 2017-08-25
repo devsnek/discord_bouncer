@@ -38,30 +38,30 @@ class MockAPI extends EventEmitter {
       if (!command) throw new APIError(APIErrors.INVALID_COMMAND, payload.cmd);
       resolve(command);
     })
-    .then((command) =>
-      new Promise(resolve => {
-        if (command.validation) {
-          joi.validate(payload.args, command.validation(), { convert: false }, err => {
-            if (err) throw new APIError(APIErrors.INVALID_PAYLOAD, err.message);
+      .then((command) =>
+        new Promise((resolve) => {
+          if (command.validation) {
+            joi.validate(payload.args, command.validation(), { convert: false }, (err) => {
+              if (err) throw new APIError(APIErrors.INVALID_PAYLOAD, err.message);
+              resolve(command);
+            });
+          } else {
             resolve(command);
-          });
-        } else {
-          resolve(command);
-        }
-      })
-    )
-    .then((command) =>
-      command.handler({
-        server: this,
-        client: this.client,
-        cmd: payload.cmd,
-        evt: payload.evt,
-        nonce: payload.nonce,
-        args: payload.args || {},
-      })
-    )
-    .then(data => this.dispatch(payload.nonce, payload.cmd, null, data))
-    .catch((err) => this.error(payload.nonce, payload.cmd, err.code, err.message));
+          }
+        })
+      )
+      .then((command) =>
+        command.handler({
+          server: this,
+          client: this.client,
+          cmd: payload.cmd,
+          evt: payload.evt,
+          nonce: payload.nonce,
+          args: payload.args || {},
+        })
+      )
+      .then((data) => this.dispatch(payload.nonce, payload.cmd, null, data))
+      .catch((err) => this.error(payload.nonce, payload.cmd, err.code, err.message));
   }
 
   dispatch(
@@ -99,7 +99,7 @@ class MockAPI extends EventEmitter {
   addSubscription(evt, args) {
     const dispatch = this.dispatch.bind(this, null, APICommands.DISPATCH, evt);
 
-    if (this.getSubscription(evt, args)) return;
+    if (this.getSubscription(evt, args)) return null;
 
     return this.subscriptions.add({
       dispatch,
